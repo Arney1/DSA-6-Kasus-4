@@ -10,21 +10,20 @@
 #include <malloc.h>
 #include <stdbool.h>
 #include <stdio.h>
+// typedef int infotype;
 typedef infotype infotype;
-typedef struct tElmtList *address;
-typedef struct tElmtList {
-  infotype info;
-  address next;
-} ElmtList;
+typedef address LList;
 
 bool isEmpty(address p);
 void Create_Node(address *p);
 void createList(address *p);
-void Isi_Node(address *p, infotype nilai);
+void Isi_Node_Int(address *p, int nilai);
+void Isi_Node_Str(address *p, char *nilai);
 void Tampil_List(address p);
 void Ins_Awal(address *p, address PNew);
 void Ins_Akhir(address *p, address PNew);
-address Search(address p, infotype nilai);
+address Search_Int(address p, int nilai);
+address Search_Str(address p, char *nilai);
 void InsertAfter(address *pBef, address PNew);
 void Del_Awal(address *p, infotype *X);
 void Del_Akhir(address *p, infotype *X);

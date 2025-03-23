@@ -8,6 +8,6 @@ void Tampil_List(address p);
 // void popAllAndPrint(Stack *q);
 void createQueue(address *p);
 void Create_Node(address *p);
-void Isi_Node(address *p, infotype nilai);
+void Isi_Node_Str(address *p, char *nilai);
 void Enqueue(address *p, address pNew);
 void Dequeue(address *p, infotype *X);

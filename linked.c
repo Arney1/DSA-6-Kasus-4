@@ -1,6 +1,7 @@
 #include "linked.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 bool isEmpty(address p) {
   // if (p == NULL) {
@@ -10,9 +11,7 @@ bool isEmpty(address p) {
   return (p == NULL);
 }
 
-void createList(address *p) {
-    *p = NULL;
-}
+void createList(address *p) { *p = NULL; }
 
 void Create_Node(address *p) {
   *p = (address)malloc(sizeof(ElmtList));
@@ -21,9 +20,18 @@ void Create_Node(address *p) {
   // }
 }
 
-void Isi_Node(address *p, infotype nilai) {
+void Isi_Node_Int(address *p, int nilai) {
   if (*p != NULL) {
-    (**p).info = nilai;
+    (**p).info.intValue = nilai;
+    (**p).type = INTEGER;
+    (**p).next = NULL;
+  }
+}
+
+void Isi_Node_Str(address *p, char *nilai) {
+  if (*p != NULL) {
+    strcpy((**p).info.strValue, nilai);
+    (**p).type = STRING;
     (**p).next = NULL;
   }
 }
@@ -35,10 +43,15 @@ void Tampil_List(address p) {
   // }
   // printf("NULL\n");
   if (isEmpty(p)) {
-      printf("NULL\n");
+    printf("NULL\n");
   } else {
-      printf("%d -> ", (*p).info);
+    if ((*p).type == STRING) {
+      printf("%s -> ", (*p).info.strValue);
       Tampil_List((*p).next);
+    } else {
+      printf("%d -> ", (*p).info.intValue);
+      Tampil_List((*p).next);
+    }
   }
 }
 
@@ -59,9 +72,18 @@ void Ins_Akhir(address *p, address PNew) {
   }
 }
 
-address Search(address p, infotype nilai) {
+address Search_Int(address p, int nilai) {
   while (!isEmpty(p)) {
-    if ((*p).info == nilai) {
+    if ((*p).info.intValue == nilai) {
+      return p;
+    }
+    p = (*p).next;
+  }
+  return NULL;
+}
+address Search_Str(address p, char *nilai) {
+  while (!isEmpty(p)) {
+    if (strcmp((*p).info.strValue, nilai)) {
       return p;
     }
     p = (*p).next;
@@ -136,27 +158,27 @@ int NbElmt(address p) {
   }
 }
 
-infotype Min(address p) {
-  int Min = (*p).info;
-  p = (*p).next;
-  while (!isEmpty(p)) {
-    if ((*p).info < Min) {
-      Min = (*p).info;
-    }
-    p = (*p).next;
-  }
-  return Min;
-}
+// infotype Min(address p) {
+//   int Min = (*p).info;
+//   p = (*p).next;
+//   while (!isEmpty(p)) {
+//     if ((*p).info < Min) {
+//       Min = (*p).info;
+//     }
+//     p = (*p).next;
+//   }
+//   return Min;
+// }
 
-infotype Rerata(address p) {
-  int sum = 0, count = 0;
-  while (!isEmpty(p)) {
-    sum += (*p).info;
-    count++;
-    p = (*p).next;
-  }
-  return (count != 0) ? sum / count : 0;
-}
+// infotype Rerata(address p) {
+//   int sum = 0, count = 0;
+//   while (!isEmpty(p)) {
+//     sum += (*p).info;
+//     count++;
+//     p = (*p).next;
+//   }
+//   return (count != 0) ? sum / count : 0;
+// }
 
 address BalikList(address p) {
   if (!isEmpty(p)) {
