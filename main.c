@@ -4,46 +4,10 @@
 #include "queue.h"
 #include "stack.h"
 #include <stdio.h>
-// #include <stdlib.h>
 #include <string.h>
 
 #define MAX_TEXT 100
 
-// // Struktur untuk Linked List (Menyimpan teks utama)
-// typedef struct Node {
-//     char text[MAX_TEXT];
-//     struct Node* next;
-// } Node;
-
-// // // Struktur untuk Stack (Undo & Redo)
-// // typedef struct Stack {
-// //     char text[MAX_TEXT];
-// //     struct Stack* next;
-// // } Stack;
-
-// Node* textHead = NULL;  // Linked list utama
-// Stack* undoStack = NULL; // Stack untuk Undo
-// Stack* redoStack = NULL; // Stack untuk Redo
-
-// Fungsi untuk push ke Stack
-// void push(Stack stack, char* text) {
-//     Stack newNode = (Stack)malloc(sizeof(Stack));
-//     strcpy(newNode, text);
-//     newNode->next = *stack;
-//     *stack = newNode;
-// }
-
-// Fungsi untuk pop dari Stack
-// char* pop(Stack** stack) {
-//     if (*stack == NULL) return NULL;
-//     Stack* temp = *stack;
-//     char* text = strdup(temp->text);
-//     *stack = (*stack)->next;
-//     free(temp);
-//     return text;
-// }
-
-// Fungsi untuk menambahkan teks ke Linked List
 void addText(Queue *history, LList *textList, Stack *undo, char *text) {
   address newNode;
   Create_Node(&newNode);
@@ -52,19 +16,13 @@ void addText(Queue *history, LList *textList, Stack *undo, char *text) {
 
   Create_Node(&newNode);
   Isi_Node_Str(&newNode, text);
-  // Push(undo, newNode);
   Enqueue(history, newNode);
 
-  // push(&undoStack, textHead ? textHead->text : ""); // Simpan ke undoStack
-  // sebelum perubahan
-
-  // Node* newNode = (Node*)malloc(sizeof(Node));
   Create_Node(&newNode);
   Isi_Node_Str(&newNode, text);
   Ins_Awal(textList, newNode);
 }
 
-// Fungsi untuk menghapus teks terbaru
 void deleteText(LList *textList, Stack *undo) {
   if (isEmpty(*textList)) {
     return;
@@ -72,16 +30,12 @@ void deleteText(LList *textList, Stack *undo) {
   address newNode;
   Create_Node(&newNode);
   Isi_Node_Str(&newNode, (*textList)->info.strValue);
-  Push(undo, newNode); // Simpan ke undoStack sebelum perubahan
+  Push(undo, newNode);
 
-  // address temp = textHead;
-  // textHead = textHead->next;
-  // free(temp);
   infotype X;
   Del_Awal(textList, &X);
 }
 
-// Fungsi untuk melakukan Undo
 void undo(LList *textList, Stack *undo, Stack *redo, Queue *history) {
   if (isEmpty(*undo)) {
     return;
@@ -89,7 +43,7 @@ void undo(LList *textList, Stack *undo, Stack *redo, Queue *history) {
   address newNode;
   Create_Node(&newNode);
   Isi_Node_Str(&newNode, !isEmpty(*textList) ? (*textList)->info.strValue : "");
-  Push(redo, newNode); // Simpan state saat ini ke redoStack
+  Push(redo, newNode);
 
   infotype lastState;
   Pop(undo, &lastState);
@@ -104,7 +58,6 @@ void undo(LList *textList, Stack *undo, Stack *redo, Queue *history) {
   }
 }
 
-// Fungsi untuk melakukan Redo
 void redo(LList *textList, Stack *undo, Stack *redo, Queue *history) {
   if (isEmpty(*redo)) {
     return;
@@ -112,17 +65,34 @@ void redo(LList *textList, Stack *undo, Stack *redo, Queue *history) {
   address newNode;
   Create_Node(&newNode);
   Isi_Node_Str(&newNode, !isEmpty(*textList) ? (*textList)->info.strValue : "");
-  Push(undo,
-       newNode); // Simpan state saat ini ke undoStack
+  Push(undo, newNode);
 
   infotype nextState;
   Pop(redo, &nextState);
   if (strlen(nextState.strValue) > 0) {
-    addText(history, textList, undo, nextState.strValue);
+    address tempNode;
+    Create_Node(&tempNode);
+    Isi_Node_Str(&tempNode, nextState.strValue);
+    Ins_Awal(textList, tempNode);
   }
 }
 
-// Fungsi untuk menampilkan teks saat ini
+void rollback(LList *textList, Queue *history) {
+  if (isEmpty(*history)) {
+    printf("Tidak ada history untuk rollback.\n");
+    return;
+  }
+  infotype oldState;
+  Dequeue(history, &oldState);
+  if (strlen(oldState.strValue) > 0) {
+    address tempNode;
+    Create_Node(&tempNode);
+    Isi_Node_Str(&tempNode, oldState.strValue);
+    Ins_Awal(textList, tempNode);
+    printf("Rollback berhasil ke: %s\n", oldState.strValue);
+  }
+}
+
 void displayText(LList textList) {
   if (isEmpty(textList)) {
     printf("Teks kosong.\n");
@@ -131,7 +101,6 @@ void displayText(LList textList) {
   printf("Teks saat ini: %s\n", textList->info.strValue);
 }
 
-// Menu utama
 void menu() {
   int choice;
   char input[MAX_TEXT];
@@ -150,16 +119,17 @@ void menu() {
     printf("3. Undo\n");
     printf("4. Redo\n");
     printf("5. Tampilkan Teks\n");
-    printf("6. Keluar\n");
+    printf("6. Rollback\n");
+    printf("7. Keluar\n");
     printf("Pilih: ");
     scanf("%d", &choice);
-    getchar(); // Menghindari masalah newline
+    getchar();
 
     switch (choice) {
     case 1:
       printf("Masukkan teks: ");
       fgets(input, MAX_TEXT, stdin);
-      input[strcspn(input, "\n")] = 0; // Hapus newline
+      input[strcspn(input, "\n")] = 0;
       addText(&history, &text, &undoStack, input);
       break;
     case 2:
@@ -178,12 +148,15 @@ void menu() {
       displayText(text);
       break;
     case 6:
+      rollback(&text, &history);
+      break;
+    case 7:
       printf("Keluar dari editor.\n");
       break;
     default:
       printf("Pilihan tidak valid.\n");
     }
-  } while (choice != 6);
+  } while (choice != 7);
 }
 
 int main() {
